@@ -1,8 +1,7 @@
-package ru.practicum.dto.sensor;
+package ru.yandex.practicum.collector.dto.sensor;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
@@ -11,12 +10,14 @@ import lombok.experimental.SuperBuilder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SwitchSensorEvent extends SensorEvent{
+public class TemperatureSensorEvent extends SensorEvent {
     @NotNull
-    private Boolean state;
+    private Integer temperatureC;
+    @NotNull
+    private Integer temperatureF;
 
     @Override
     public SensorEventType getType() {
-        return SensorEventType.SWITCH_SENSOR_EVENT;
+        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
     }
 }

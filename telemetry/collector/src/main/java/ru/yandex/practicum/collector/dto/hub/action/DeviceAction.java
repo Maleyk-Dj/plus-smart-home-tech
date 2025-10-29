@@ -1,4 +1,4 @@
-package ru.practicum.dto.action;
+package ru.yandex.practicum.collector.dto.hub.action;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

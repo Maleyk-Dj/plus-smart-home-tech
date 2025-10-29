@@ -2,11 +2,11 @@
 protocol HubEventProtocol {
 
 enum DeviceTypeAvro {
-    MOTION_SENSOR,
-    LIGHT_SENSOR,
-    SWITCH_SENSOR,
-    CLIMATE_SENSOR,
-    TEMPERATURE_SENSOR
+     MOTION_SENSOR,
+     TEMPERATURE_SENSOR,
+     LIGHT_SENSOR,
+     CLIMATE_SENSOR,
+     SWITCH_SENSOR
 }
 
 enum ConditionTypeAvro {
@@ -32,7 +32,7 @@ enum ActionTypeAvro {
 }
  record DeviceAddedEventAvro {
     string id;
-    DeviceTypeAvro type;
+    DeviceTypeAvro device_type;
   }
 
   record DeviceRemovedEventAvro {
@@ -64,7 +64,7 @@ enum ActionTypeAvro {
 
   record HubEventAvro {
     string hub_id;
-    long timestamp; // timestamp-millis
+    long timestamp;
     union {
       DeviceAddedEventAvro,
       DeviceRemovedEventAvro,

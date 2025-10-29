@@ -1,22 +1,21 @@
-package ru.practicum.dto.hub;
+package ru.yandex.practicum.collector.dto.hub;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Getter @Setter @ToString
+@Setter
+@Getter
+@ToString
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeviceAddedEvent extends HubEvent{
+public class DeviceRemovedEvent extends HubEvent {
     @NotBlank
     private String id;
-    @NotNull
-    private DeviceType deviceType;
 
     @Override
     public HubEventType getType() {
-        return HubEventType.DEVICE_ADDED;
+        return HubEventType.DEVICE_REMOVED;
     }
 }

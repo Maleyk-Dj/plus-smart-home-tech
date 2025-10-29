@@ -1,16 +1,18 @@
-package ru.practicum.dto.hub;
+package ru.yandex.practicum.collector.dto.hub;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import ru.practicum.dto.action.DeviceAction;
-import ru.practicum.dto.scenario.ScenarioCondition;
+import ru.yandex.practicum.collector.dto.hub.action.DeviceAction;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import ru.yandex.practicum.collector.dto.hub.scenario.ScenarioCondition;
 
 import java.util.List;
 
-@Setter @Getter @ToString
+@Setter
+@Getter
+@ToString
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @NoArgsConstructor
@@ -21,10 +23,10 @@ public class ScenarioAddedEvent extends HubEvent {
     private String name;
     @NotNull
     @Valid
-    private List <ScenarioCondition> conditions;
+    private List<ScenarioCondition> conditions;
     @NotNull
     @Valid
-    private List <DeviceAction> actions;
+    private List<DeviceAction> actions;
 
 
     @Override

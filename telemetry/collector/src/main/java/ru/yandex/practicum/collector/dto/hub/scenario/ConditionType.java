@@ -1,4 +1,4 @@
-package ru.practicum.dto.scenario;
+package ru.yandex.practicum.collector.dto.hub.scenario;
 
 public enum ConditionType {
     MOTION,

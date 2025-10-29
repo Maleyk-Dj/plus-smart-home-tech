@@ -1,10 +1,8 @@
-package ru.practicum.dto.hub;
+package ru.yandex.practicum.collector.dto.hub;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
@@ -22,14 +20,14 @@ import java.time.Instant;
         @JsonSubTypes.Type(value = ScenarioRemovedEvent.class, name = "SCENARIO_REMOVED")
 })
 
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public abstract class HubEvent {
     @NotBlank
     private String hubId;
 
-    @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private Instant timestamp=Instant.now();
+    private Instant timestamp = Instant.now();
 
     public abstract HubEventType getType();
 }

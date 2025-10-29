@@ -1,4 +1,4 @@
-package ru.practicum.dto.sensor;
+package ru.yandex.practicum.collector.dto.sensor;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -10,16 +10,18 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MotionSensorEvent extends SensorEvent{
+public class ClimateSensorEvent extends SensorEvent {
+
     @NotNull
-    private Integer linkQuality;
+    private Integer temperatureC;
     @NotNull
-    private Boolean motion;
+    private Integer humidity;
     @NotNull
-    private Integer voltage;
+    private Integer co2Level;
+
 
     @Override
     public SensorEventType getType() {
-        return SensorEventType.MOTION_SENSOR_EVENT;
+        return SensorEventType.CLIMATE_SENSOR_EVENT;
     }
 }

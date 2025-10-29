@@ -1,4 +1,4 @@
-package ru.practicum.dto.action;
+package ru.yandex.practicum.collector.dto.hub.action;
 
 public enum ActionType {
     ACTIVATE,

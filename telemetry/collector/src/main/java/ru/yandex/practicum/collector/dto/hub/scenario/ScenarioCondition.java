@@ -1,4 +1,4 @@
-package ru.practicum.dto.scenario;
+package ru.yandex.practicum.collector.dto.hub.scenario;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

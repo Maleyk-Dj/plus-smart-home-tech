@@ -1,7 +1,6 @@
-package ru.practicum.dto.sensor;
+package ru.yandex.practicum.collector.dto.sensor;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter

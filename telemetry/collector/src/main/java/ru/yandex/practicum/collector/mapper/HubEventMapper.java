@@ -24,7 +24,7 @@ public class HubEventMapper {
                 DeviceAddedEvent ev = (DeviceAddedEvent) dto;
                 DeviceAddedEventAvro payload = DeviceAddedEventAvro.newBuilder()
                         .setId(ev.getId())
-                        .setType(DeviceTypeAvro.valueOf(ev.getDeviceType().name()))
+                        .setDeviceType(DeviceTypeAvro.valueOf(ev.getDeviceType().name()))
                         .build();
                 builder.setPayload(payload);
                 break;
@@ -51,7 +51,6 @@ public class HubEventMapper {
                                 .setType(ConditionTypeAvro.valueOf(condDto.getType().name()))
                                 .setOperation(ConditionOperationAvro.valueOf(condDto.getOperation().name()));
 
-                        // значение union { null, int, boolean }
                         Object val = condDto.getValue();
                         if (val == null) {
                             condB.setValue(null);
@@ -61,18 +60,16 @@ public class HubEventMapper {
                         } else if (val instanceof Integer) {
                             condB.setValue((Integer) val);
                         } else if (val instanceof Long) {
-                            // если пришло long, приводим к int (по соглашению Avro-схемы)
                             condB.setValue(((Long) val).intValue());
                         } else {
-                            // попытка распознать "логический" или целочисленный вид из строки/прочего
-                            throw new IllegalArgumentException("Unsupported ScenarioCondition.value type: " + val.getClass());
+                            throw new IllegalArgumentException("Unsupported ScenarioCondition.value type: "
+                                    + val.getClass());
                         }
 
                         conditionAvros.add(condB.build());
                     }
                 }
 
-                // actions
                 List<DeviceActionAvro> actionAvros = new ArrayList<>();
                 if (ev.getActions() != null) {
                     for (DeviceAction actionDto : ev.getActions()) {
@@ -90,7 +87,6 @@ public class HubEventMapper {
                         actionAvros.add(actB.build());
                     }
                 }
-
                 ScenarioAddedEventAvro payload = ScenarioAddedEventAvro.newBuilder()
                         .setName(ev.getName())
                         .setConditions(conditionAvros)
@@ -100,7 +96,6 @@ public class HubEventMapper {
                 builder.setPayload(payload);
                 break;
             }
-
             case SCENARIO_REMOVED: {
                 ScenarioRemovedEvent ev = (ScenarioRemovedEvent) dto;
                 ScenarioRemovedEventAvro payload = ScenarioRemovedEventAvro.newBuilder()
@@ -113,7 +108,6 @@ public class HubEventMapper {
             default:
                 throw new IllegalArgumentException("Unknown HubEvent type: " + dto.getType());
         }
-
         return builder.build();
     }
 }
