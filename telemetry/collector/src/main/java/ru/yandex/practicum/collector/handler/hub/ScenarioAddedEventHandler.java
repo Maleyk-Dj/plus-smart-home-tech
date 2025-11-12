@@ -1,0 +1,58 @@
+package ru.yandex.practicum.collector.handler.hub;
+
+
+import lombok.RequiredArgsConstructor;
+import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.collector.mapper.Mapper;
+import ru.yandex.practicum.collector.kafka.CollectorTopics;
+import ru.yandex.practicum.collector.kafka.EventProducer;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioAddedEventProto;
+import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
+
+
+import java.time.Instant;
+
+@Component
+@RequiredArgsConstructor
+public class ScenarioAddedEventHandler implements HubEventHandler {
+    private final EventProducer producer;
+
+    @Override
+    public HubEventProto.PayloadCase getMessageType() {
+        return HubEventProto.PayloadCase.SCENARIO_ADDED;
+    }
+
+    @Override
+    public void handle(HubEventProto request) {
+        ScenarioAddedEventProto scenarioAddedEventProto = request.getScenarioAdded();
+
+        ScenarioAddedEventAvro scenarioAddedEventAvro = ScenarioAddedEventAvro.newBuilder()
+                .setName(scenarioAddedEventProto.getName())
+                .setConditions(Mapper.mapToScenarioConditionAvro(scenarioAddedEventProto.getConditionList()))
+                .setActions(Mapper.mapToDeviceActionAvro(scenarioAddedEventProto.getActionList()))
+                .build();
+
+        HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
+                .setHubId(request.getHubId())
+                .setTimestamp(Instant.ofEpochSecond(
+                        request.getTimestamp().getSeconds(),
+                        request.getTimestamp().getNanos()
+                ).toEpochMilli())
+                .setPayload(scenarioAddedEventAvro)
+                .build();
+
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                CollectorTopics.TELEMETRY_HUBS_V1,
+                null,
+                Instant.now().toEpochMilli(),
+                request.getHubId(),
+                hubEventAvro
+        );
+
+        producer.getProducer().send(record);
+    }
+}
