@@ -1,6 +1,9 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.collector.kafka.CollectorSerializer
 
 
 grpc:
@@ -16,5 +19,3 @@ logging:
     org.springframework.grpc: DEBUG
     org.apache.kafka: DEBUG
     org.springframework.kafka: DEBUG
-  pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

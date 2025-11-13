@@ -1,7 +1,6 @@
 package ru.yandex.practicum.collector.handler.hub;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,10 @@ import ru.yandex.practicum.grpc.telemetry.event.DeviceAddedEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-@Slf4j
+
+import java.time.Instant;
+
+
 @Component
 @RequiredArgsConstructor
 public class DeviceAddedEventHandler implements HubEventHandler {
@@ -25,37 +27,24 @@ public class DeviceAddedEventHandler implements HubEventHandler {
 
     @Override
     public void handle(HubEventProto request) {
-        log.info("🔄 Processing DEVICE_ADDED event for hub: {}", request.getHubId());
+        DeviceAddedEventProto deviceAddedEventProto = request.getDeviceAdded();
 
-        try {
-            DeviceAddedEventProto deviceAdded = request.getDeviceAdded();
-            log.debug("Device ID: {}, Type: {}", deviceAdded.getId(), deviceAdded.getType());
+        ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
+                CollectorTopics.TELEMETRY_HUBS_V1,
+                null,
+                Instant.now().toEpochMilli(),
+                request.getHubId(),
+                new HubEventAvro(
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new DeviceAddedEventAvro(
+                                deviceAddedEventProto.getId(),
+                                Converter.mapToDeviceTypeAvro(deviceAddedEventProto.getType())
+                        )
+                )
+        );
 
-            DeviceAddedEventAvro deviceAddedEventAvro = DeviceAddedEventAvro.newBuilder()
-                    .setId(deviceAdded.getId())
-                    .setDeviceType(Converter.mapToDeviceTypeAvro(deviceAdded.getType()))
-                    .build();
-
-            HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
-                    .setHubId(request.getHubId())
-                    .setTimestamp(request.getTimestamp().getSeconds() * 1000)
-                    .setPayload(deviceAddedEventAvro)
-                    .build();
-
-            ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
-                    "telemetry.hubs.v1",
-                    null,
-                    System.currentTimeMillis(),
-                    request.getHubId(),
-                    hubEventAvro
-            );
-
-            producer.getProducer().send(record);
-            log.info("✅ Successfully sent DEVICE_ADDED to Kafka for device: {}", deviceAdded.getId());
-
-        } catch (Exception e) {
-            log.error("💥 Error in DeviceAddedEventHandler for hub: {}", request.getHubId(), e);
-            throw new RuntimeException("Failed to process device added event", e);
-        }
+        producer.getProducer().send(record);
     }
 }
+

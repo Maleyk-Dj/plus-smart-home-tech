@@ -12,8 +12,8 @@ import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceRemovedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 
-
 import java.time.Instant;
+
 
 @Component
 @RequiredArgsConstructor
@@ -29,27 +29,19 @@ public class DeviceRemovedEventHandler implements HubEventHandler {
     public void handle(HubEventProto request) {
         DeviceRemovedEventProto deviceRemovedEventProto = request.getDeviceRemoved();
 
-        DeviceRemovedEventAvro deviceRemovedEventAvro = DeviceRemovedEventAvro.newBuilder()
-                .setId(deviceRemovedEventProto.getId())
-                .build();
-
-        HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
-                .setHubId(request.getHubId())
-                .setTimestamp(Instant.ofEpochSecond(
-                        request.getTimestamp().getSeconds(),
-                        request.getTimestamp().getNanos()
-                ).toEpochMilli())
-                .setPayload(deviceRemovedEventAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_HUBS_V1,
                 null,
                 Instant.now().toEpochMilli(),
                 request.getHubId(),
-                hubEventAvro
+                new HubEventAvro(
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new DeviceRemovedEventAvro(
+                                deviceRemovedEventProto.getId()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

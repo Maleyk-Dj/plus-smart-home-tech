@@ -11,10 +11,11 @@ import ru.yandex.practicum.grpc.telemetry.event.SwitchSensorProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SwitchSensorAvro;
 
+import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class SwitchSensorEventHandler implements SensorEventHandler {
-
     private final EventProducer producer;
 
     @Override
@@ -25,26 +26,20 @@ public class SwitchSensorEventHandler implements SensorEventHandler {
     @Override
     public void handle(SensorEventProto request) {
         SwitchSensorProto switchSensorProto = request.getSwitchSensor();
-
-        SwitchSensorAvro switchSensorAvro = SwitchSensorAvro.newBuilder()
-                .setState(switchSensorProto.getState())
-                .build();
-
-        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
-                .setId(request.getId())
-                .setHubId(request.getHubId())
-                .setTimestamp(request.getTimestamp().getSeconds() * 1000)
-                .setPayload(switchSensorAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_SENSORS_V1,
                 null,
-                System.currentTimeMillis(),
+                Instant.now().toEpochMilli(),
                 request.getHubId(),
-                sensorEventAvro
+                new SensorEventAvro(
+                        request.getId(),
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new SwitchSensorAvro(
+                                switchSensorProto.getState()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

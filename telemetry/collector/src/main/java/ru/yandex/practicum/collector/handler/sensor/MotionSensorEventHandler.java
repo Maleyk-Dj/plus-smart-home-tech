@@ -11,6 +11,8 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
+import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class MotionSensorEventHandler implements SensorEventHandler {
@@ -21,33 +23,26 @@ public class MotionSensorEventHandler implements SensorEventHandler {
     public SensorEventProto.PayloadCase getMessageType() {
         return SensorEventProto.PayloadCase.MOTION_SENSOR;
     }
-
     @Override
     public void handle(SensorEventProto request) {
         MotionSensorProto motionSensorProto = request.getMotionSensor();
 
-        MotionSensorAvro motionSensorAvro = MotionSensorAvro.newBuilder()
-                .setLinkQuality(motionSensorProto.getLinkQuality())
-                .setMotion(motionSensorProto.getMotion())
-                .setVoltage(motionSensorProto.getVoltage())
-                .build();
-
-        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
-                .setId(request.getId())
-                .setHubId(request.getHubId())
-                .setTimestamp(request.getTimestamp().getSeconds() * 1000 +
-                        request.getTimestamp().getNanos() / 1_000_000)
-                .setPayload(motionSensorAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_SENSORS_V1,
                 null,
-                System.currentTimeMillis(),
+                Instant.now().toEpochMilli(),
                 request.getHubId(),
-                sensorEventAvro
+                new SensorEventAvro(
+                        request.getId(),
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new MotionSensorAvro(
+                                motionSensorProto.getLinkQuality(),
+                                motionSensorProto.getMotion(),
+                                motionSensorProto.getVoltage()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

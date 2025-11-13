@@ -16,6 +16,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 
 import java.time.Instant;
 
+
 @Component
 @RequiredArgsConstructor
 public class ScenarioAddedEventHandler implements HubEventHandler {
@@ -29,30 +30,21 @@ public class ScenarioAddedEventHandler implements HubEventHandler {
     @Override
     public void handle(HubEventProto request) {
         ScenarioAddedEventProto scenarioAddedEventProto = request.getScenarioAdded();
-
-        ScenarioAddedEventAvro scenarioAddedEventAvro = ScenarioAddedEventAvro.newBuilder()
-                .setName(scenarioAddedEventProto.getName())
-                .setConditions(Mapper.mapToScenarioConditionAvro(scenarioAddedEventProto.getConditionList()))
-                .setActions(Mapper.mapToDeviceActionAvro(scenarioAddedEventProto.getActionList()))
-                .build();
-
-        HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
-                .setHubId(request.getHubId())
-                .setTimestamp(Instant.ofEpochSecond(
-                        request.getTimestamp().getSeconds(),
-                        request.getTimestamp().getNanos()
-                ).toEpochMilli())
-                .setPayload(scenarioAddedEventAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_HUBS_V1,
                 null,
                 Instant.now().toEpochMilli(),
                 request.getHubId(),
-                hubEventAvro
+                new HubEventAvro(
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new ScenarioAddedEventAvro(
+                                scenarioAddedEventProto.getName(),
+                                Mapper.mapToScenarioConditionAvro(scenarioAddedEventProto.getConditionList()),
+                                Mapper.mapToDeviceActionAvro(scenarioAddedEventProto.getActionList())
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

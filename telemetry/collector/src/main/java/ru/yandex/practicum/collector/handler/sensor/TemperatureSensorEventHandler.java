@@ -11,10 +11,11 @@ import ru.yandex.practicum.grpc.telemetry.event.TemperatureSensorProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
 
+import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class TemperatureSensorEventHandler implements SensorEventHandler {
-
     private final EventProducer producer;
 
     @Override
@@ -25,27 +26,21 @@ public class TemperatureSensorEventHandler implements SensorEventHandler {
     @Override
     public void handle(SensorEventProto request) {
         TemperatureSensorProto temperatureSensorProto = request.getTemperatureSensor();
-
-        TemperatureSensorAvro temperatureSensorAvro = TemperatureSensorAvro.newBuilder()
-                .setTemperatureC(temperatureSensorProto.getTemperatureC())
-                .setTemperatureF(temperatureSensorProto.getTemperatureF())
-                .build();
-
-        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
-                .setId(request.getId())
-                .setHubId(request.getHubId())
-                .setTimestamp(request.getTimestamp().getSeconds() * 1000)
-                .setPayload(temperatureSensorAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_SENSORS_V1,
                 null,
-                System.currentTimeMillis(),
+                Instant.now().toEpochMilli(),
                 request.getHubId(),
-                sensorEventAvro
+                new SensorEventAvro(
+                        request.getId(),
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new TemperatureSensorAvro(
+                                temperatureSensorProto.getTemperatureC(),
+                                temperatureSensorProto.getTemperatureF()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

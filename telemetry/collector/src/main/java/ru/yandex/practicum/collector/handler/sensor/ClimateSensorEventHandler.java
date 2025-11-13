@@ -11,10 +11,11 @@ import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
+import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class ClimateSensorEventHandler implements SensorEventHandler {
-
     private final EventProducer producer;
 
     @Override
@@ -25,28 +26,22 @@ public class ClimateSensorEventHandler implements SensorEventHandler {
     @Override
     public void handle(SensorEventProto request) {
         ClimateSensorProto climateSensorProto = request.getClimateSensor();
-
-        ClimateSensorAvro climateSensorAvro = ClimateSensorAvro.newBuilder()
-                .setTemperatureC(climateSensorProto.getTemperatureC())
-                .setHumidity(climateSensorProto.getHumidity())
-                .setCo2Level(climateSensorProto.getCo2Level())
-                .build();
-
-        SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
-                .setId(request.getId())
-                .setHubId(request.getHubId())
-                .setTimestamp(request.getTimestamp().getSeconds() * 1000)
-                .setPayload(climateSensorAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_SENSORS_V1,
                 null,
-                System.currentTimeMillis(),
+                Instant.now().toEpochMilli(),
                 request.getHubId(),
-                sensorEventAvro
+                new SensorEventAvro(
+                        request.getId(),
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new ClimateSensorAvro(
+                                climateSensorProto.getTemperatureC(),
+                                climateSensorProto.getHumidity(),
+                                climateSensorProto.getCo2Level()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }

@@ -64,8 +64,7 @@ enum ActionTypeAvro {
 
   record HubEventAvro {
     string hub_id;
-    long timestamp;
-    union {
+    timestamp_ms timestamp;    union {
       DeviceAddedEventAvro,
       DeviceRemovedEventAvro,
       ScenarioAddedEventAvro,

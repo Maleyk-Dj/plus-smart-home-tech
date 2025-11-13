@@ -14,6 +14,7 @@ import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 
 
 import java.time.Instant;
+
 @Component
 @RequiredArgsConstructor
 public class ScenarioRemovedEventHandler implements HubEventHandler {
@@ -27,28 +28,19 @@ public class ScenarioRemovedEventHandler implements HubEventHandler {
     @Override
     public void handle(HubEventProto request) {
         ScenarioRemovedEventProto scenarioRemovedEventProto = request.getScenarioRemoved();
-
-        ScenarioRemovedEventAvro scenarioRemovedEventAvro = ScenarioRemovedEventAvro.newBuilder()
-                .setName(scenarioRemovedEventProto.getName())
-                .build();
-
-        HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
-                .setHubId(request.getHubId())
-                .setTimestamp(Instant.ofEpochSecond(
-                        request.getTimestamp().getSeconds(),
-                        request.getTimestamp().getNanos()
-                ).toEpochMilli())
-                .setPayload(scenarioRemovedEventAvro)
-                .build();
-
         ProducerRecord<String, SpecificRecordBase> record = new ProducerRecord<>(
                 CollectorTopics.TELEMETRY_HUBS_V1,
                 null,
                 Instant.now().toEpochMilli(),
                 request.getHubId(),
-                hubEventAvro
+                new HubEventAvro(
+                        request.getHubId(),
+                        Instant.ofEpochSecond(request.getTimestamp().getSeconds(), request.getTimestamp().getNanos()),
+                        new ScenarioRemovedEventAvro(
+                                scenarioRemovedEventProto.getName()
+                        )
+                )
         );
-
         producer.getProducer().send(record);
     }
 }
