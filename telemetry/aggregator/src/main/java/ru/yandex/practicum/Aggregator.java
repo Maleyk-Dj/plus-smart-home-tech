@@ -11,10 +11,10 @@ import ru.yandex.practicum.config.AggregationStarter;
  */
 @SpringBootApplication
 @Slf4j
-public class AggregatorService {
+public class Aggregator {
     public static void main(String[] args) {
         log.info("Launch AggregatorService");
-        ConfigurableApplicationContext context = SpringApplication.run(AggregatorService.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(Aggregator.class, args);
 
         AggregationStarter aggregator = context.getBean(AggregationStarter.class);
         aggregator.start();
