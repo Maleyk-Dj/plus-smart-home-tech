@@ -1,19 +1,21 @@
 spring:
-  application:
-    name: collector
-
-
   kafka:
     bootstrap-servers: localhost:9092
-    schema-registry-url: http://localhost:8081
-    sensor-topic: telemetry.sensors.v1
-    hub-topic: telemetry.hubs.v1
-  jackson:
-    serialization:
-      # Отключает сериализацию дат в виде числа (Unix-timestamp).
-      # Это стандартная практика при работе с ISO-форматом.
-      write-dates-as-timestamps: false
-    deserialization:
-      # КРИТИЧЕСКИ ВАЖНАЯ НАСТРОЙКА:
-      # Позволяет Jackson парсить даты с микро- и наносекундами (более 3 знаков после запятой).
-      read-date-timestamps-as-nanoseconds: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.kafka.CollectorSerializer
+
+
+grpc:
+  server:
+    port: 59091
+
+server:
+  port: 8080
+
+logging:
+  level:
+    ru.yandex.practicum.collector: DEBUG
+    org.springframework.grpc: DEBUG
+    org.apache.kafka: DEBUG
+    org.springframework.kafka: DEBUG
