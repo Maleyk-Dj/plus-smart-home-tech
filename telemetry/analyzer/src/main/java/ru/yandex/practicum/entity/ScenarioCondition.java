@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.kafka.common.metrics.Sensor;
 
 @Entity
 @Table(name = "scenario_conditions")
@@ -38,7 +37,7 @@ public class ScenarioCondition {
     @JoinColumn(name = "sensor_id")
     @MapsId(value = "sensorId")
     @ToString.Exclude
-    private HomeSensor sensor;
+    private Sensor sensor;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "condition_id")
