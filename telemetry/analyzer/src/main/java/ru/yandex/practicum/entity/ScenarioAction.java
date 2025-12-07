@@ -37,7 +37,7 @@ public class ScenarioAction {
     @JoinColumn(name = "sensor_id")
     @MapsId(value = "sensorId")
     @ToString.Exclude
-    private HomeSensor sensor;
+    private Sensor sensor;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "action_id")

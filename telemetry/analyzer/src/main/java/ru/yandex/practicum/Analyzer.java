@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @Slf4j
+
 public class Analyzer {
     public static void main(String[] args) {
         log.info("Запуск модуля Analyzer");
