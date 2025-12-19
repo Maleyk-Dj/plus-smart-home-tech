@@ -6,6 +6,7 @@ import ru.yandex.practicum.dto.store.ProductCategory;
 import ru.yandex.practicum.dto.store.ProductState;
 import ru.yandex.practicum.dto.store.QuantityState;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 
@@ -32,8 +33,8 @@ public class Product {
     private ProductState productState;
     @Enumerated(EnumType.STRING)
     private ProductCategory productCategory;
-    @Column(nullable = false)
-    private double price;
+    @Column(nullable = false, precision = 11, scale = 2)
+    private BigDecimal price;
 
     @PrePersist
     private void generateId() {

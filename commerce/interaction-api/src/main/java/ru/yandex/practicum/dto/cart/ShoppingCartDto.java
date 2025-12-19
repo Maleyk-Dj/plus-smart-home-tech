@@ -1,18 +1,13 @@
 package ru.yandex.practicum.dto.cart;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ShoppingCartDto {
-    @NotNull
-    private String shoppingCartId;
-    @NotNull
-    private Map<String, Long> products;
+public record ShoppingCartDto(
+        @NotNull(message = "Идентификатор корзины в БД не может быть пустым")
+        String shoppingCartId,
+        @NotNull(message = "Список отображений идентификаторов товара на отобранное количество не может быть null")
+        Map<String, Long> products
+) {
 }

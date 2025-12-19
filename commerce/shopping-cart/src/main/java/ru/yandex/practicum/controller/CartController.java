@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.contract.shoppingcart.ShoppingCart;
 import ru.yandex.practicum.dto.cart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.dto.cart.ShoppingCartDto;
-import ru.yandex.practicum.http.ShoppingCart;
 import ru.yandex.practicum.service.CartService;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class CartController implements ShoppingCart {
 
     @Override
     @GetMapping
-    public ShoppingCartDto getShoppingCart(@RequestParam String username) {
+    public ShoppingCartDto getShoppingCart(@RequestParam  @NotNull String username) {
         log.info("Запущен метод getShoppingCart(String username {})", username);
         return service.getShoppingCart(username);
     }

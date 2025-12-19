@@ -1,0 +1,62 @@
+spring:
+  cloud:
+    gateway:
+      discovery:locator:enabled: true
+      routes:
+        - id: shopping_cart_service_route
+          uri: lb://shopping-cart
+          predicates:
+            - Path=/shopping-cart/**
+          filters:
+            - PrefixPath=/api/v1
+        - id: shopping_store_service_retry
+          uri: lb://shopping-store
+          predicates:
+            - Path=/shopping-store/**
+          filters:
+            - PrefixPath=/api/v1
+
+            # Retry функциональность
+            - name: Retry
+              args:
+                retries: 3
+                statuses: NOT_FOUND
+                methods: GET
+                backoff:
+                  firstBackoff: 10ms
+                  maxBackoff: 50 ms
+                  factor: 2
+                  basedOnPreviousValue: false
+
+
+server:
+  port: 8080
+
+# Настройки Resilience4j для Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+      shoppingStoreCB:
+        baseConfig: default
+
+logging:
+  level:
+    # Gateway логи
+    org.springframework.cloud.gateway: TRACE  # или DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
+    reactor.netty.http.client: DEBUG
+    com.netflix.discovery: DEBUG
+
+    # Security логи (если добавили Spring Security)
+    org.springframework.security: DEBUG
+
+    # Дополнительные логи для отладки
+    org.springframework.web: DEBUG
+    io.github.resilience4j: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

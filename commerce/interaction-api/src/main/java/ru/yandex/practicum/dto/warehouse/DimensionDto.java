@@ -2,25 +2,18 @@ package ru.yandex.practicum.dto.warehouse;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DimensionDto {
+public record DimensionDto(
+        @NotNull(message = "Ширина не может быть null")
+        @DecimalMin(value = "1.0", message = "Ширина не может быть меньше 1.0")
+        Double width,
 
-    @NotNull(message = "Ширина обязательна")
-    @DecimalMin(value = "1.0", message = "Ширина должна быть не менее 1")
-    private Double width; // number($double), minimum: 1
+        @NotNull(message = "Высота не может быть null")
+        @DecimalMin(value = "1.0", message = "Высота не может быть меньше 1.0")
+        Double height,
 
-    @NotNull(message = "Высота обязательна")
-    @DecimalMin(value = "1.0", message = "Высота должна быть не менее 1")
-    private Double height; // number($double), minimum: 1, example: 1
-
-    @NotNull(message = "Глубина обязательна")
-    @DecimalMin(value = "1.0", message = "Глубина должна быть не менее 1")
-    private Double depth; // number($double), minimum: 1, example: 1
+        @NotNull(message = "Толшина не может быть null")
+        @DecimalMin(value = "1.0", message = "Толщина не может быть меньше 1.0")
+        Double depth
+) {
 }
-

@@ -9,6 +9,19 @@ import ru.yandex.practicum.model.Product;
 
 @Component
 public class Mapper {
+    public static Product mapToProduct(ProductDto productDto) {
+        return Product.builder()
+                .productId(productDto.productId())
+                .productName(productDto.productName())
+                .description(productDto.description())
+                .imageSrc(productDto.imageSrc())
+                .quantityState(productDto.quantityState())
+                .productState(productDto.productState())
+                .productCategory(productDto.productCategory())
+                .price(productDto.price())
+                .build();
+    }
+
     public static ProductDto mapToProductDto(Product product) {
         return ProductDto.builder()
                 .productId(product.getProductId())
@@ -19,19 +32,6 @@ public class Mapper {
                 .productState(product.getProductState())
                 .productCategory(product.getProductCategory())
                 .price(product.getPrice())
-                .build();
-    }
-
-    public static Product mapToProduct(ProductDto productDto) {
-        return Product.builder()
-                .productId(productDto.getProductId())
-                .productName(productDto.getProductName())
-                .description(productDto.getDescription())
-                .imageSrc(productDto.getImageSrc())
-                .quantityState(productDto.getQuantityState())
-                .productState(productDto.getProductState())
-                .productCategory(productDto.getProductCategory())
-                .price(productDto.getPrice())
                 .build();
     }
 
