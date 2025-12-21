@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class ProductInShoppingCartLowQuantityInWarehouse extends RuntimeException {
-  HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-  String userMessage = "Ошибка, товар из корзины не находится в требуемом количестве на складе";
+  private final HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+  private final String userMessage = "Ошибка, товар из корзины не находится в требуемом количестве на складе";
 
   public ProductInShoppingCartLowQuantityInWarehouse(String message) {
     super(message);

@@ -1,24 +1,24 @@
 package ru.yandex.practicum.handler;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
-import ru.yandex.practicum.exception.NoSuchCartException;
-import ru.yandex.practicum.exception.NotAuthorizedUserException;
+import ru.yandex.practicum.exception.ApiError;
+import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
+import ru.yandex.practicum.exception.ProductInShoppingCartLowQuantityInWarehouse;
+import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
 
 import java.time.LocalDateTime;
 
-@RestControllerAdvice
+@ControllerAdvice
 @Slf4j
-public class Handler {
+public class WarehouseExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -40,25 +40,27 @@ public class Handler {
         return new ApiError(e.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
 
-    @ExceptionHandler(NoSuchCartException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError handleNoSuchBasketException(NoSuchCartException e) {
-        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new ApiError(e.getMessage(), HttpStatus.NOT_FOUND, LocalDateTime.now());
-    }
-
-    @ExceptionHandler(NoProductsInShoppingCartException.class)
+    @ExceptionHandler(NoSpecifiedProductInWarehouseException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public NoProductsInShoppingCartException handleNoProductsInShoppingCartException(NoProductsInShoppingCartException e) {
+    public NoSpecifiedProductInWarehouseException handleNoSpecifiedProductInWarehouseException(NoSpecifiedProductInWarehouseException e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new NoProductsInShoppingCartException(e.getMessage());
+        return new NoSpecifiedProductInWarehouseException(e.getMessage());
     }
 
-    @ExceptionHandler(NotAuthorizedUserException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public NotAuthorizedUserException handleNotAuthorizedUserException(NotAuthorizedUserException e) {
+    @ExceptionHandler(ProductInShoppingCartLowQuantityInWarehouse.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProductInShoppingCartLowQuantityInWarehouse handleProductInShoppingCartLowQuantityInWarehouse(
+            ProductInShoppingCartLowQuantityInWarehouse e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new NotAuthorizedUserException(e.getMessage());
+        return new ProductInShoppingCartLowQuantityInWarehouse(e.getMessage());
+    }
+
+    @ExceptionHandler(SpecifiedProductAlreadyInWarehouseException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public SpecifiedProductAlreadyInWarehouseException handleSpecifiedProductAlreadyInWarehouseException(
+            SpecifiedProductAlreadyInWarehouseException e) {
+        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
+        return new SpecifiedProductAlreadyInWarehouseException(e.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -75,3 +77,4 @@ public class Handler {
         return new ApiError(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now());
     }
 }
+

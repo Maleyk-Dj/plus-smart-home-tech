@@ -1,26 +1,24 @@
 package ru.yandex.practicum.handler;
-
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.exception.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.yandex.practicum.exception.ApiError;
+import ru.yandex.practicum.exception.ProductNotFoundException;
 
 import java.time.LocalDateTime;
 
-
 @ControllerAdvice
 @Slf4j
-public class Handler {
+public class StoreExceptionHandler {
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -28,17 +26,9 @@ public class Handler {
         return new ApiError(e.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
 
-    @ExceptionHandler(ProductInShoppingCartLowQuantityInWarehouse.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProductInShoppingCartLowQuantityInWarehouse handleProductInShoppingCartLowQuantityInWarehouse(
-            ProductInShoppingCartLowQuantityInWarehouse e) {
-        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new ProductInShoppingCartLowQuantityInWarehouse(e.getMessage());
-    }
-
-    @ExceptionHandler(InvalidRequestException.class)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ApiError handleInvalidRequestException(InvalidRequestException e) {
+    public ApiError handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
         return new ApiError(e.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
@@ -57,32 +47,18 @@ public class Handler {
         return new ApiError(e.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleConstraintViolationException(ConstraintViolationException e) {
+    @ExceptionHandler(PropertyReferenceException.class)
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ApiError handlePropertyReferenceException(PropertyReferenceException e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
         return new ApiError(e.getMessage(), HttpStatus.BAD_REQUEST, LocalDateTime.now());
     }
 
-    @ExceptionHandler(NoProductsInShoppingCartException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public NoProductsInShoppingCartException handleNoProductsInShoppingCartException(NoProductsInShoppingCartException e) {
-        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new NoProductsInShoppingCartException(e.getMessage());
-    }
-
-    @ExceptionHandler(NotAuthorizedUserException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public NotAuthorizedUserException handleNotAuthorizedUserException(NotAuthorizedUserException e) {
-        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new NotAuthorizedUserException(e.getMessage());
-    }
-
-    @ExceptionHandler(NoOrderFoundException.class)
+    @ExceptionHandler(ProductNotFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public NoOrderFoundException handleNoOrderFoundException(NoOrderFoundException e) {
+    public ProductNotFoundException handleProductNotFoundException(ProductNotFoundException e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new NoOrderFoundException(e.getMessage());
+        return new ProductNotFoundException(e.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -90,13 +66,6 @@ public class Handler {
     public ApiError handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
         return new ApiError(e.getMessage(), HttpStatus.CONFLICT, LocalDateTime.now());
-    }
-
-    @ExceptionHandler(WarehouseServiceUnavailableException.class)
-    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE)
-    public ApiError handleWarehouseServiceUnavailableException(WarehouseServiceUnavailableException e) {
-        log.warn("Исключение: {} Сообщение: {} ", e.getClass().getSimpleName(), e.getMessage());
-        return new ApiError(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, LocalDateTime.now());
     }
 
     @ExceptionHandler(Exception.class)

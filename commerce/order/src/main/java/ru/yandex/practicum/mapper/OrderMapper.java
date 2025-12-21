@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class Mapper {
+public class OrderMapper {
     public static List<ProductQuantity> mapToProductQuantity(CreateNewOrderRequest newOrder, Order order) {
         return newOrder.shoppingCart().products().entrySet().stream()
                 .map(product -> ProductQuantity.builder()

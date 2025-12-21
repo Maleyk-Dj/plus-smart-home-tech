@@ -8,7 +8,7 @@ import ru.yandex.practicum.dto.store.ProductDto;
 import ru.yandex.practicum.model.Product;
 
 @Component
-public class Mapper {
+public class StoreMapper {
     public static Product mapToProduct(ProductDto productDto) {
         return Product.builder()
                 .productId(productDto.productId())

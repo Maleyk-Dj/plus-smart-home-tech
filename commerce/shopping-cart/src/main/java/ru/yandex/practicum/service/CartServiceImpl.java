@@ -13,7 +13,7 @@ import ru.yandex.practicum.entity.ShoppingCartState;
 import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.exception.NoSuchCartException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.CartMapper;
 import ru.yandex.practicum.repository.ProductQuantityRepository;
 import ru.yandex.practicum.repository.ShoppingCartRepository;
 import ru.yandex.practicum.service.warehouseclient.WarehouseClient;
@@ -39,7 +39,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new NoSuchCartException(String.format("Нет корзины пользователя c id = %s",
                         username)));
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class CartServiceImpl implements CartService {
             ShoppingCart shoppingCart = shoppingCartRepository.findByUserName(username)
                     .orElseGet(() -> shoppingCartRepository.save(createShoppingCart(username)));
 
-            productQuantityRepository.saveAll(Mapper.mapToProductQuantity(productList, shoppingCart));
+            productQuantityRepository.saveAll(CartMapper.mapToProductQuantity(productList, shoppingCart));
             return new ShoppingCartDto(shoppingCart.getShoppingCartId(), productList);
         });
     }
@@ -98,7 +98,7 @@ public class CartServiceImpl implements CartService {
 
         shoppingCart.getProductQuantities().removeAll(productQuantitiesInCart);
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     @Override
@@ -123,7 +123,7 @@ public class CartServiceImpl implements CartService {
                 .setQuantity(changeProductQuantityRequest.newQuantity());
 
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     private ShoppingCart createShoppingCart(String username) {

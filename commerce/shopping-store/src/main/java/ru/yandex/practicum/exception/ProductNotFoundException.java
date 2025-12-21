@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class ProductNotFoundException extends RuntimeException {
-  HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-  String userMessage = "Ошибка, товар по идентификатору в БД не найден";
+  private final HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+  private final String userMessage = "Ошибка, товар по идентификатору в БД не найден";
 
   public ProductNotFoundException(String message) {
     super(message);

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.exception.ProductNotFoundException;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.StoreMapper;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.StoreRepository;
 import ru.yandex.practicum.dto.store.PageResponse;
@@ -32,7 +32,7 @@ public class StoreServiceImpl implements StoreService {
     public PageResponse getAllByType(ProductCategory category, Pageable customPageable) {
         if (customPageable.page() == null || customPageable.size() == null) {
             List<Product> products = storeRepository.getAllByProductCategory(category);
-            List<ProductDto> productDtos = products.stream().map(Mapper::mapToProductDto).toList();
+            List<ProductDto> productDtos = products.stream().map(StoreMapper::mapToProductDto).toList();
             return new PageResponse(productDtos, List.of());
         }
 
@@ -40,7 +40,7 @@ public class StoreServiceImpl implements StoreService {
         if (customPageable.sort() == null) {
             pageable = PageRequest.of(customPageable.page(), customPageable.size());
             List<Product> products = storeRepository.getAllByProductCategory(category, pageable);
-            List<ProductDto> productDtos = products.stream().map(Mapper::mapToProductDto).toList();
+            List<ProductDto> productDtos = products.stream().map(StoreMapper::mapToProductDto).toList();
             return new PageResponse(productDtos, List.of());
         } else {
             String fieldName = customPageable.sort()[0];
@@ -51,7 +51,7 @@ public class StoreServiceImpl implements StoreService {
             pageable = PageRequest.of(customPageable.page(), customPageable.size(), sort);
 
             List<Product> products = storeRepository.getAllByProductCategory(category, pageable);
-            List<ProductDto> productDtos = products.stream().map(Mapper::mapToProductDto).toList();
+            List<ProductDto> productDtos = products.stream().map(StoreMapper::mapToProductDto).toList();
             return new PageResponse(productDtos, List.of(new SortOrder(fieldName, sortingDirection)));
         }
     }
@@ -59,8 +59,8 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public ProductDto addProduct(ProductDto productDto) {
-        Product product = storeRepository.save(Mapper.mapToProduct(productDto));
-        return Mapper.mapToProductDto(product);
+        Product product = storeRepository.save(StoreMapper.mapToProduct(productDto));
+        return StoreMapper.mapToProductDto(product);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class StoreServiceImpl implements StoreService {
         Optional.ofNullable(productDto.productCategory()).ifPresent(product::setProductCategory);
         Optional.ofNullable(productDto.price()).ifPresent(product::setPrice);
 
-        return Mapper.mapToProductDto(product);
+        return StoreMapper.mapToProductDto(product);
     }
 
     @Override
@@ -113,6 +113,6 @@ public class StoreServiceImpl implements StoreService {
         Product product = storeRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(String.format("Нет товара c id = %s", productId)));
 
-        return Mapper.mapToProductDto(product);
+        return StoreMapper.mapToProductDto(product);
     }
 }

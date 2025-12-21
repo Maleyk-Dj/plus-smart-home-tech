@@ -14,7 +14,7 @@ import ru.yandex.practicum.dto.order.CreateNewOrderRequest;
 import ru.yandex.practicum.dto.order.OrderDto;
 import ru.yandex.practicum.dto.order.ProductReturnRequest;
 import ru.yandex.practicum.dto.order.StateOrder;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.OrderMapper;
 import ru.yandex.practicum.repository.OrderRepository;
 import ru.yandex.practicum.dto.warehouse.AddressDto;
 import ru.yandex.practicum.dto.warehouse.BookedProductsDto;
@@ -52,14 +52,14 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable = PageRequest.of(0, 10);
         List<Order> orders = orderRepository.findAllByUserName(username, pageable);
 
-        return orders.stream().map(Mapper::mapToOrderDto).toList();
+        return orders.stream().map(OrderMapper::mapToOrderDto).toList();
     }
 
     @Override
     @Transactional
     public OrderDto addOrder(CreateNewOrderRequest newOrder, String username) {
-        Order order = orderRepository.save(Mapper.mapToOrder(newOrder, username));
-        order.setProducts(Mapper.mapToProductQuantity(newOrder, order));
+        Order order = orderRepository.save(OrderMapper.mapToOrder(newOrder, username));
+        order.setProducts(OrderMapper.mapToProductQuantity(newOrder, order));
 
         AddressDto toAddressDto = newOrder.deliveryAddress();
         AddressDto fromAddressDto = warehouseClient.getWarehouseAddress();
@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
                 toAddressDto, order.getOrderId(), DeliveryState.CREATED));
 
         order.setDeliveryId(deliveryDto.deliveryId());
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
             throw new NoProductsInShoppingCartException("Товары для возврата не соответствуют заказу");
         }
         order.setState(StateOrder.PRODUCT_RETURNED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -100,9 +100,9 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new NoOrderFoundException(String.format("Заказ с id = %s не найден",
                         orderId)));
 
-        paymentClient.payment(Mapper.mapToOrderDto(order));
+        paymentClient.payment(OrderMapper.mapToOrderDto(order));
         order.setState(StateOrder.PAID);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         order.setState(StateOrder.PAYMENT_FAILED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         order.setState(state);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         order.setState(StateOrder.DELIVERY_FAILED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         order.setState(StateOrder.COMPLETED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -155,12 +155,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NoOrderFoundException(String.format("Заказ с id = %s не найден",
                         orderId)));
-        BigDecimal productCost = paymentClient.productCost(Mapper.mapToOrderDto(order));
+        BigDecimal productCost = paymentClient.productCost(OrderMapper.mapToOrderDto(order));
         order.setProductPrice(productCost);
-        BigDecimal totalCost = paymentClient.getTotalCost(Mapper.mapToOrderDto(order));
+        BigDecimal totalCost = paymentClient.getTotalCost(OrderMapper.mapToOrderDto(order));
         order.setTotalPrice(totalCost);
         order.setState(StateOrder.ON_PAYMENT);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -169,9 +169,9 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NoOrderFoundException(String.format("Заказ с id = %s не найден",
                         orderId)));
-        BigDecimal deliveryPrice = deliveryClient.deliveryCost(Mapper.mapToOrderDto(order));
+        BigDecimal deliveryPrice = deliveryClient.deliveryCost(OrderMapper.mapToOrderDto(order));
         order.setDeliveryPrice(deliveryPrice);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -182,13 +182,13 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         BookedProductsDto bookedProductsDto = warehouseClient.prepareItemsForShipment(
-                Mapper.mapToAssemblyProducts(order.getProducts(), order.getOrderId()));
+                OrderMapper.mapToAssemblyProducts(order.getProducts(), order.getOrderId()));
 
         order.setDeliveryWeight(bookedProductsDto.deliveryWeight());
         order.setDeliveryVolume(bookedProductsDto.deliveryVolume());
         order.setFragile(bookedProductsDto.fragile());
         order.setState(StateOrder.ASSEMBLED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 
     @Override
@@ -199,6 +199,6 @@ public class OrderServiceImpl implements OrderService {
                         orderId)));
 
         order.setState(StateOrder.ASSEMBLY_FAILED);
-        return Mapper.mapToOrderDto(order);
+        return OrderMapper.mapToOrderDto(order);
     }
 }

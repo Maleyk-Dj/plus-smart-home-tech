@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class Mapper {
+public class CartMapper {
 
     public static List<ProductQuantity> mapToProductQuantity(Map<String, Long> productList,
                                                              ShoppingCart shoppingCart) {

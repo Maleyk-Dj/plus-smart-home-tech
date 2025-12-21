@@ -12,7 +12,8 @@ import ru.yandex.practicum.entity.Address;
 import ru.yandex.practicum.entity.Delivery;
 import ru.yandex.practicum.exception.NoDeliveryFoundException;
 import ru.yandex.practicum.contract.warehouse.Warehouse;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.AddressMapper;
+import ru.yandex.practicum.mapper.DeliveryMapper;
 import ru.yandex.practicum.repository.AddressRepository;
 import ru.yandex.practicum.repository.DeliveryRepository;
 import ru.yandex.practicum.service.orderclient.OrderClient;
@@ -40,10 +41,16 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     @Transactional
     public DeliveryDto planDelivery(DeliveryDto deliveryDto) {
-        Address fromAddress = addressRepository.save(Mapper.mapToAddress(deliveryDto.fromAddress()));
-        Address toAddress = addressRepository.save(Mapper.mapToAddress(deliveryDto.toAddress()));
-        Delivery delivery = deliveryRepository.save(Mapper.mapToDelivery(deliveryDto, fromAddress, toAddress));
-        return Mapper.mapToDeliveryDto(delivery);
+        Address fromAddress = addressRepository.save(AddressMapper.mapToAddress(deliveryDto.fromAddress()));
+        Address toAddress = addressRepository.save(AddressMapper.mapToAddress(deliveryDto.toAddress()));
+        Delivery delivery = deliveryRepository.save(DeliveryMapper.mapToDelivery(deliveryDto));
+        delivery.setFromAddress(fromAddress);
+        delivery.setToAddress(toAddress);
+        delivery.setFragile(true);
+        delivery.setDeliveryVolume(0);
+        delivery.setDeliveryWeight(0);
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+        return DeliveryMapper.mapToDeliveryDto(savedDelivery);
     }
 
     @Override

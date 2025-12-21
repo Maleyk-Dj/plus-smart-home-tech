@@ -8,7 +8,7 @@ import ru.yandex.practicum.dto.payment.PaymentDto;
 import ru.yandex.practicum.dto.payment.StatusPayment;
 import ru.yandex.practicum.dto.store.ProductDto;
 import ru.yandex.practicum.exception.NoPaymentFoundException;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.PaymentMapper;
 import ru.yandex.practicum.model.Payment;
 import ru.yandex.practicum.repository.PaymentRepository;
 import ru.yandex.practicum.service.orderclient.OrderClient;
@@ -27,8 +27,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto paymentFormation(OrderDto orderDto) {
-        Payment payment = paymentRepository.save(Mapper.mapToPayment(orderDto));
-        return Mapper.mapToPaymentDto(payment);
+        Payment payment = paymentRepository.save(PaymentMapper.mapToPayment(orderDto));
+        return PaymentMapper.mapToPaymentDto(payment);
     }
 
     @Override

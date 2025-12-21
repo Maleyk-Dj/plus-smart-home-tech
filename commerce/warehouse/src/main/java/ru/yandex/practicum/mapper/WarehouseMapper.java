@@ -6,7 +6,7 @@ import ru.yandex.practicum.dto.warehouse.NewProductInWarehouseRequest;
 import ru.yandex.practicum.entity.Product;
 
 
-public class Mapper {
+public class WarehouseMapper {
     public static Product mapToProduct(NewProductInWarehouseRequest newProductInWarehouseRequest) {
         return Product.builder()
                 .productId(newProductInWarehouseRequest.productId())

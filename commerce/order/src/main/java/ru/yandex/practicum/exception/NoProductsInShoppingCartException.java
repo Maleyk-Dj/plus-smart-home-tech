@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class NoProductsInShoppingCartException extends RuntimeException {
-    HttpStatus httpStatus = HttpStatus.NOT_FOUND;
-    String userMessage = "Нет искомых товаров в корзине";
+    private final HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+    private final String userMessage = "Нет искомых товаров в корзине";
 
     public NoProductsInShoppingCartException(String message) {
         super(message);

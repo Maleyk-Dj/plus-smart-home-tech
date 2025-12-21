@@ -11,7 +11,7 @@ import ru.yandex.practicum.entity.Product;
 import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.exception.ProductInShoppingCartLowQuantityInWarehouse;
 import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.WarehouseMapper;
 import ru.yandex.practicum.repository.OrderBookingsRepository;
 import ru.yandex.practicum.repository.ProductRepository;
 
@@ -37,7 +37,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     "зарегистрирован на складе");
         }
 
-        Product product = Mapper.mapToProduct(newProductInWarehouseRequest);
+        Product product = WarehouseMapper.mapToProduct(newProductInWarehouseRequest);
         productRepository.save(product);
     }
 
@@ -72,7 +72,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                             productInShoppingCartLowQuantityInWarehouse));
         }
 
-        return Mapper.mapToBookedProductsDto(deliveryWeight, deliveryVolume, fragile);
+        return WarehouseMapper.mapToBookedProductsDto(deliveryWeight, deliveryVolume, fragile);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     (String.format("Ошибка, эти товары из корзины не находится в требуемом количестве на складе: %s",
                             productInShoppingCartLowQuantityInWarehouse));
         }
-        return Mapper.mapToBookedProductsDto(deliveryWeight, deliveryVolume, fragile);
+        return WarehouseMapper.mapToBookedProductsDto(deliveryWeight, deliveryVolume, fragile);
     }
 
     @Override
