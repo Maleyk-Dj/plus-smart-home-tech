@@ -1,8 +1,10 @@
 package ru.yandex.practicum.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.yandex.practicum.dto.cart.ChangeProductQuantityRequest;
 import ru.yandex.practicum.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.entity.ProductQuantity;
@@ -11,19 +13,21 @@ import ru.yandex.practicum.entity.ShoppingCartState;
 import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.exception.NoSuchCartException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
-import ru.yandex.practicum.mapper.Mapper;
+import ru.yandex.practicum.mapper.CartMapper;
 import ru.yandex.practicum.repository.ProductQuantityRepository;
 import ru.yandex.practicum.repository.ShoppingCartRepository;
+import ru.yandex.practicum.service.warehouseclient.WarehouseClient;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Slf4j
 public class CartServiceImpl implements CartService {
     private final WarehouseClient warehouseClient;
     private final ShoppingCartRepository shoppingCartRepository;
     private final ProductQuantityRepository productQuantityRepository;
+    private final TransactionTemplate transactionTemplate;
 
     @Override
     public ShoppingCartDto getShoppingCart(String username) {
@@ -35,28 +39,25 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new NoSuchCartException(String.format("Нет корзины пользователя c id = %s",
                         username)));
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     @Override
-    @Transactional
     public ShoppingCartDto addProductToCart(String username, Map<String, Long> productList) {
         if (username == null || username.isBlank()) {
             throw new NotAuthorizedUserException("Имя пользователя не должно быть пустым");
         }
 
-        ShoppingCart shoppingCart = shoppingCartRepository.findByUserName(username)
-                .orElseGet(() -> shoppingCartRepository.save(createShoppingCart(username)));
+        warehouseClient.assemblyProductForOrderFromShoppingCart(
+                new ShoppingCartDto("", productList));
 
-        warehouseClient.sufficiencyCheck(
-                new ru.yandex.practicum.dto.warehouse.ShoppingCartDto(
-                        shoppingCart.getShoppingCartId(),
-                        productList
-                ));
+        return transactionTemplate.execute((status) -> {
+            ShoppingCart shoppingCart = shoppingCartRepository.findByUserName(username)
+                    .orElseGet(() -> shoppingCartRepository.save(createShoppingCart(username)));
 
-        productQuantityRepository.saveAll(Mapper.mapToProductQuantity(productList, shoppingCart));
-
-        return new ShoppingCartDto(shoppingCart.getShoppingCartId(), productList);
+            productQuantityRepository.saveAll(CartMapper.mapToProductQuantity(productList, shoppingCart));
+            return new ShoppingCartDto(shoppingCart.getShoppingCartId(), productList);
+        });
     }
 
     @Override
@@ -97,7 +98,7 @@ public class CartServiceImpl implements CartService {
 
         shoppingCart.getProductQuantities().removeAll(productQuantitiesInCart);
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     @Override
@@ -115,14 +116,14 @@ public class CartServiceImpl implements CartService {
         shoppingCart.getProductQuantities()
                 .stream()
                 .filter(productQuantity -> Objects.equals(productQuantity.getProductId(),
-                        changeProductQuantityRequest.getProductId()))
+                        changeProductQuantityRequest.productId()))
                 .findFirst()
                 .orElseThrow(() -> new NoProductsInShoppingCartException(String.format("Нет искомых товаров в " +
-                        "корзине c id = %s", changeProductQuantityRequest.getProductId())))
-                .setQuantity(changeProductQuantityRequest.getNewQuantity());
+                        "корзине c id = %s", changeProductQuantityRequest.productId())))
+                .setQuantity(changeProductQuantityRequest.newQuantity());
 
 
-        return Mapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
+        return CartMapper.mapToShoppingCartDto(shoppingCart.getShoppingCartId(), shoppingCart.getProductQuantities());
     }
 
     private ShoppingCart createShoppingCart(String username) {

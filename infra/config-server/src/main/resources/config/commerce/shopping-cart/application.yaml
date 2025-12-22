@@ -13,3 +13,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=cart_schema
     username: postgres
     password: 12345
+
+logging:
+  level:
+    # Общие логи уровня INFO
+    root: INFO
+    # Уровень DEBUG для всего Spring Web: покажет сопоставление путей (request mapping)
+    org.springframework.web: DEBUG

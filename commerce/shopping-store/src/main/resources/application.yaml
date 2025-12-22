@@ -18,5 +18,11 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
 
+  instance:
+    # 1. Принудительное использование localhost для регистрации в Eureka
+    hostname: localhost
+    # 2. Использование IP-адреса, если hostname не помог (дополнительная мера)
+    prefer-ip-address: true
+
 server:
   port: 36135

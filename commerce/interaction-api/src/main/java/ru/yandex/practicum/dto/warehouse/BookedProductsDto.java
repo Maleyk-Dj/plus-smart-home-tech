@@ -1,24 +1,15 @@
 package ru.yandex.practicum.dto.warehouse;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class BookedProductsDto {
+public record BookedProductsDto(
+        @NotNull(message = "Общий вес доставки не может быть null")
+        Double deliveryWeight,
 
-    @NotNull(message = "Delivery weight is required")
-    @PositiveOrZero(message = "Delivery weight must be positive or zero")
-    private Double deliveryWeight;
+        @NotNull(message = "Общий объём доставки не может быть null")
+        Double deliveryVolume,
 
-    @NotNull(message = "Delivery volume is required")
-    @PositiveOrZero(message = "Delivery volume must be positive or zero")
-    private Double deliveryVolume;
-
-    @NotNull(message = "Fragile flag is required")
-    private Boolean fragile;
+        @NotNull(message = "Информация о хрупкости вещей не может быть null")
+        Boolean fragile
+) {
 }

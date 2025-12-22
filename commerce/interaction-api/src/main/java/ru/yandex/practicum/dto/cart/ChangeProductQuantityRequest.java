@@ -1,17 +1,12 @@
 package ru.yandex.practicum.dto.cart;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class ChangeProductQuantityRequest {
-    @NotNull
-    private String productId;
-    @NotNull
-    private Long newQuantity; // because int64}
+public record ChangeProductQuantityRequest(
+        @NotBlank(message = "Идентификатор товара не может быть null или пустым")
+        String productId,
+        @NotNull(message = "Новое количество товара не может быть null")
+        Long newQuantity
+) {
 }
